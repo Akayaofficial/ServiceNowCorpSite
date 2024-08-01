@@ -1,3 +1,7 @@
+# This workflow uses ServiceNow custom actions that are certified by ServiceNow.
+
+name: CICD GitHub workflow
+
 on:
   push:
     branches: [ "main" ]
@@ -30,6 +34,7 @@ jobs:
           # Add your test commands here
 
   uat:
+    name: 'UAT'
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +46,7 @@ jobs:
           # Add your UAT test commands here
 
   deploy:
-    name: Deploy
+    name: 'Deploy'
     needs: uat
     runs-on: ubuntu-latest
     steps:
@@ -50,29 +55,24 @@ jobs:
       - name: ServiceNow Change
         uses: ServiceNow/servicenow-devops-change@v4.0.0
         with:
-          # Devops Integration Token
           devops-integration-token: ${{ secrets.SN_DEVOPS_TOKEN }}
-          # ServiceNow Instance URL
           instance-url: ${{ secrets.SN_INSTANCE_URL }}
-          # Orchestration Tool Id
           tool-id: ${{ secrets.SN_ORCHESTRATION_TOOL_ID }}
-          # GitHub Context
           context-github: ${{ toJSON(github) }}
-          # Display Name of the Job
           job-name: 'Deploy'
-          change-request: >
-          {
-            "attributes": {
-              "requested_by": {"name": "DevOps System"},
-              "cmdb_ci": {"name": "ServiceNow Corpsite"},
-              "business_service": {"name": "ServiceNow Corpsite Service"},
-              "assignment_group": {"name": "Change management"},
-              "priority": "2",
-              "comments": "This is a sample pipeline script to be added in your change step",
-              "work_notes": "Update this to work_notes",
-              "u_mitigation_for_operational_impact": "Back change out",
-              "u_time_for_mitigation_to_complete": "Less than 15 minutes",
-              "u_mitigation_is_successfully_tested": "Yes",
-              "u_validation_type": "Technical validation only"
+          change-request: |
+            {
+              "attributes": {
+                "requested_by": {"name": "DevOps System"},
+                "cmdb_ci": {"name": "ServiceNow Corpsite"},
+                "business_service": {"name": "ServiceNow Corpsite Service"},
+                "assignment_group": {"name": "Change management"},
+                "priority": "2",
+                "comments": "This is a sample pipeline script to be added in your change step",
+                "work_notes": "Update this to work_notes",
+                "u_mitigation_for_operational_impact": "Back change out",
+                "u_time_for_mitigation_to_complete": "Less than 15 minutes",
+                "u_mitigation_is_successfully_tested": "Yes",
+                "u_validation_type": "Technical validation only"
+              }
             }
-          }
